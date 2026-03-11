@@ -3,7 +3,9 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>THISISAWESOMERADIO</title>
+<title>THISISAWESOMERADIO – Independent Radio aus Bremen</title>
+<meta name="description" content="THISISAWESOMERADIO – Kein Format-Radio. Kein Algorithmus. Nur Musik, die zählt. 24/7 live aus Bremen." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📻</text></svg>" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;1,300&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
 <style>
@@ -18,7 +20,6 @@
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   html { scroll-behavior: smooth; }
 
   body {
@@ -116,6 +117,38 @@
 
   .nav-links a:hover { color: var(--text); }
 
+  /* TICKER */
+  .ticker {
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    padding: 10px 0;
+    background: var(--surface);
+  }
+
+  .ticker-inner {
+    display: flex;
+    gap: 60px;
+    animation: ticker 30s linear infinite;
+    white-space: nowrap;
+  }
+
+  .ticker-inner:hover { animation-play-state: paused; }
+
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  .ticker-item {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  .ticker-item span { color: var(--accent); margin-right: 8px; }
+
   /* HERO */
   .hero {
     padding: 80px 32px 60px;
@@ -193,9 +226,7 @@
     margin-bottom: 14px;
   }
 
-  .track-info {
-    margin-bottom: 32px;
-  }
+  .track-info { margin-bottom: 32px; }
 
   .track-title {
     font-family: 'Instrument Serif', serif;
@@ -226,7 +257,6 @@
     width: 4px;
     background: var(--accent);
     border-radius: 2px 2px 0 0;
-    transform-origin: bottom;
     opacity: 0.3;
     transition: height 0.1s;
   }
@@ -247,6 +277,7 @@
     display: flex;
     align-items: center;
     gap: 20px;
+    margin-bottom: 12px;
   }
 
   .btn-play {
@@ -300,22 +331,9 @@
   }
 
   .stream-info {
-    margin-top: 20px;
-    font-size: 10px;
+    font-size: 11px;
     color: var(--muted);
     letter-spacing: 0.1em;
-  }
-
-  /* STREAM URL NOTICE */
-  .stream-notice {
-    margin-top: 10px;
-    padding: 10px 14px;
-    background: rgba(232,255,71,0.06);
-    border: 1px solid rgba(232,255,71,0.15);
-    border-radius: 4px;
-    font-size: 10px;
-    color: var(--accent);
-    letter-spacing: 0.05em;
   }
 
   /* SCHEDULE STRIP */
@@ -334,11 +352,9 @@
     border-right: 1px solid var(--border);
     min-width: 200px;
     transition: background 0.2s;
-    cursor: default;
   }
 
   .show-slot:hover { background: var(--surface); }
-
   .show-slot.current { background: var(--surface); }
   .show-slot.current .show-name { color: var(--accent); }
 
@@ -511,106 +527,14 @@
 
   .footer-links a:hover { color: var(--text); }
 
-  /* TICKER */
-  .ticker {
-    border-bottom: 1px solid var(--border);
-    overflow: hidden;
-    padding: 10px 0;
-    background: var(--surface);
-  }
-
-  .ticker-inner {
-    display: flex;
-    gap: 60px;
-    animation: ticker 30s linear infinite;
-    white-space: nowrap;
-  }
-
-  .ticker-inner:hover { animation-play-state: paused; }
-
-  @keyframes ticker {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
-  }
-
-  .ticker-item {
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    flex-shrink: 0;
-  }
-
-  .ticker-item span { color: var(--accent); margin-right: 8px; }
-
-  /* PLAYER CONTROLS */
-  .player-controls {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    margin-bottom: 12px;
-  }
-
-  .btn-play {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    background: var(--accent);
-    color: var(--bg);
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: transform 0.15s, box-shadow 0.15s;
-    flex-shrink: 0;
-  }
-
-  .btn-play:hover {
-    transform: scale(1.07);
-    box-shadow: 0 0 24px rgba(232,255,71,0.35);
-  }
-
-  .volume-area {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex: 1;
-  }
-
-  .vol-icon { color: var(--muted); }
-
-  input[type=range] {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    height: 2px;
-    background: var(--border);
-    outline: none;
-    border-radius: 2px;
-  }
-
-  input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: var(--accent);
-    cursor: pointer;
-  }
-
-  .stream-info {
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-  }
-
   @media (max-width: 900px) {
     .hero { grid-template-columns: 1fr; }
     .hero-left { border-right: none; border-bottom: 1px solid var(--border); padding-right: 0; padding-bottom: 48px; margin-bottom: 48px; }
     .hero-right { padding-left: 0; }
     .content { grid-template-columns: 1fr; }
     .content-col { border-right: none; border-bottom: 1px solid var(--border); }
+    header { padding: 14px 20px; }
+    .nav-links { display: none; }
   }
 </style>
 </head>
@@ -621,21 +545,21 @@
   <a class="logo" href="#">THISISAWESOMERADIO</a>
   <div class="header-meta">
     <div class="live-badge">
-      <div class="live-dot on-air" id="liveDot"></div>
-      <span id="liveText">ON AIR</span>
+      <div class="live-dot" id="liveDot"></div>
+      <span id="liveText">OFFLINE</span>
     </div>
     <ul class="nav-links">
-      <li><a href="#">Programm</a></li>
-      <li><a href="#">Reviews</a></li>
-      <li><a href="#">Mixes</a></li>
-      <li><a href="#">Über uns</a></li>
+      <li><a href="#programm">Programm</a></li>
+      <li><a href="#reviews">Reviews</a></li>
+      <li><a href="#mixes">Mixes</a></li>
+      <li><a href="#about">Über uns</a></li>
     </ul>
   </div>
 </header>
 
 <!-- TICKER -->
 <div class="ticker">
-  <div class="ticker-inner" id="ticker">
+  <div class="ticker-inner">
     <div class="ticker-item"><span>▶</span> NOW PLAYING: THISISAWESOMERADIO – 24/7 INDEPENDENT MUSIC</div>
     <div class="ticker-item"><span>✦</span> Neue Review: Mk.gee – Two Star & The Dream Police</div>
     <div class="ticker-item"><span>✦</span> Heute 21:00 – Nightshift mit Clara K.</div>
@@ -662,10 +586,8 @@
       <div class="track-artist" id="trackArtist">THISISAWESOMERADIO</div>
     </div>
 
-    <!-- VISUALIZER -->
     <div class="visualizer" id="visualizer"></div>
 
-    <!-- PLAYER CONTROLS -->
     <div class="player-controls">
       <button class="btn-play" id="playBtn" aria-label="Play/Pause">
         <svg id="playIcon" viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
@@ -678,7 +600,7 @@
           <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
           <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
         </svg>
-        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.8" />
+        <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.8" aria-label="Lautstärke" />
       </div>
     </div>
     <div class="stream-info" id="streamInfo">Klick Play zum Starten</div>
@@ -687,7 +609,7 @@
 </section>
 
 <!-- SCHEDULE -->
-<div class="schedule-strip">
+<div class="schedule-strip" id="programm">
   <div class="show-slot">
     <div class="show-time">06:00 – 10:00</div>
     <div class="show-name">Morning Drift</div>
@@ -722,29 +644,24 @@
 
 <!-- CONTENT GRID -->
 <section class="content">
-  <!-- Reviews -->
-  <div class="content-col">
+  <div class="content-col" id="reviews">
     <div class="col-label">Aktuelle Reviews</div>
-
     <div class="review-card">
       <div class="review-genre">Indie / Art Rock</div>
       <div class="review-title">Two Star & The Dream Police</div>
       <div class="review-artist">Mk.gee</div>
       <p class="review-text">Gitarren, die klingen als würden sie durch Schmelzwasser rauschen. Mk.gee baut auf seinem Debüt eine Traumlogik auf, die zwischen Bedroom-Pop und abgründigem Art-Rock oszilliert – ungreifbar, aber vollkommen präzise.</p>
     </div>
-
     <div class="review-card">
       <div class="review-genre">Electronic / Ambient</div>
       <div class="review-title">Imaginal Disk</div>
       <div class="review-artist">Magdalena Bay</div>
-      <p class="review-text">Synthpop mit dem Weltgefühl eines Science-Fiction-Romans aus den Siebzigern. Jeder Track ein Kapitel, jede Überblendung ein Plottwist. Eines der konsequentesten Popalbum dieses Jahres.</p>
+      <p class="review-text">Synthpop mit dem Weltgefühl eines Science-Fiction-Romans aus den Siebzigern. Jeder Track ein Kapitel, jede Überblendung ein Plottwist. Eines der konsequentesten Popalben dieses Jahres.</p>
     </div>
   </div>
 
-  <!-- Mixes -->
-  <div class="content-col">
+  <div class="content-col" id="mixes">
     <div class="col-label">Top Mixes</div>
-
     <div class="mix-item">
       <div class="mix-num">01</div>
       <div>
@@ -775,11 +692,10 @@
     </div>
   </div>
 
-  <!-- About -->
-  <div class="content-col">
+  <div class="content-col" id="about">
     <div class="col-label">Über THISISAWESOMERADIO</div>
     <p class="about-text">
-      Wir sind ein unabhängiges Webradio mit einem einfachen Anspruch: <strong>Musik, die es verdient, gehört zu werden.</strong> Kein Format-Zwang, keine Playlist-Optimierung für Algorithmen, keine Werbepausen.
+      Wir sind ein unabhängiges Webradio aus Bremen mit einem einfachen Anspruch: <strong>Musik, die es verdient, gehört zu werden.</strong> Kein Format-Zwang, keine Playlist-Optimierung für Algorithmen, keine Werbepausen.
     </p>
     <p class="about-text">
       Unsere Redaktion schreibt Reviews, stellt Kontexte her und sendet sieben Tage die Woche – von Jazz bis Footwork, von Singer-Songwriter bis Industrial. Weil gute Musik keine Schubladen braucht.
@@ -791,20 +707,19 @@
 
 <!-- FOOTER -->
 <footer>
-  <div class="footer-copy">© 2025 THISISAWESOMERADIO. Alle Rechte vorbehalten.</div>
+  <div class="footer-copy">© 2024 THISISAWESOMERADIO. Alle Rechte vorbehalten.</div>
   <div class="footer-links">
-    <a href="#">Instagram</a>
-    <a href="#">Spotify</a>
-    <a href="#">Kontakt</a>
-    <a href="#">Impressum</a>
+    <a href="https://instagram.com/thisisawesomeradio" target="_blank" rel="noopener">Instagram</a>
+    <a href="https://laut.fm/thisisawesomeradio" target="_blank" rel="noopener">laut.fm</a>
+    <a href="mailto:radio@thisisawesomeradio.com">Kontakt</a>
+    <a href="#about">Impressum</a>
   </div>
 </footer>
 
 <script>
   // ─── VISUALIZER ───────────────────────────────────────────────────────────
   const vizEl = document.getElementById('visualizer');
-  const BAR_COUNT = 28;
-  for (let i = 0; i < BAR_COUNT; i++) {
+  for (let i = 0; i < 28; i++) {
     const bar = document.createElement('div');
     bar.className = 'bar';
     const minH = Math.floor(Math.random() * 6 + 3);
@@ -819,22 +734,20 @@
   const bars = vizEl.querySelectorAll('.bar');
 
   // ─── PLAYER ───────────────────────────────────────────────────────────────
-  const audio = document.getElementById('radioAudio');
-  const playBtn = document.getElementById('playBtn');
-  const playIcon = document.getElementById('playIcon');
+  const audio     = document.getElementById('radioAudio');
+  const playBtn   = document.getElementById('playBtn');
+  const playIcon  = document.getElementById('playIcon');
   const volSlider = document.getElementById('volumeSlider');
-  const liveDot = document.getElementById('liveDot');
-  const liveText = document.getElementById('liveText');
+  const liveDot   = document.getElementById('liveDot');
+  const liveText  = document.getElementById('liveText');
   const streamInfo = document.getElementById('streamInfo');
 
-  // laut.fm stream URLs – tries MP3 first, falls back to AAC
   const STREAMS = [
     'https://stream.laut.fm/thisisawesomeradio',
     'https://stream.laut.fm/thisisawesomeradio.mp3',
   ];
 
   let isPlaying = false;
-  let streamIndex = 0;
 
   function setPlaying(state) {
     isPlaying = state;
@@ -876,9 +789,12 @@
   });
 
   volSlider.addEventListener('input', () => { audio.volume = parseFloat(volSlider.value); });
-  audio.addEventListener('error', () => tryPlay(streamIndex + 1));
   audio.addEventListener('waiting', () => { streamInfo.textContent = 'Buffering…'; });
   audio.addEventListener('playing', () => { streamInfo.textContent = 'Live ✓'; });
+  audio.addEventListener('error', () => {
+    streamInfo.textContent = '⚠ Stream-Fehler.';
+    setPlaying(false);
+  });
 </script>
 </body>
 </html>
