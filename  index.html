@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>THISISAWESOMERADIO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;1,300&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0a0a08;
+    --surface: #111110;
+    --accent: #e8ff47;
+    --accent2: #ff4f3b;
+    --text: #f0ede6;
+    --muted: #5a5850;
+    --border: #252420;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* HEADER */
+  header {
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    background: rgba(10,10,8,0.92);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 0.12em;
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .header-meta {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .live-badge {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--muted);
+    transition: background 0.3s;
+  }
+
+  .live-dot.on-air {
+    background: var(--accent2);
+    box-shadow: 0 0 8px var(--accent2);
+    animation: pulse 1.8s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 28px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--text); }
+
+  /* HERO */
+  .hero {
+    padding: 80px 32px 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero::after {
+    content: '';
+    position: absolute;
+    right: -120px;
+    top: -80px;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(232,255,71,0.04) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding-right: 60px;
+    border-right: 1px solid var(--border);
+  }
+
+  .hero-tag {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 20px;
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(64px, 8vw, 110px);
+    line-height: 0.92;
+    letter-spacing: 0.02em;
+    margin-bottom: 28px;
+  }
+
+  .hero-title span {
+    color: var(--accent);
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 0.85em;
+  }
+
+  .hero-sub {
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 0.05em;
+    max-width: 340px;
+    line-height: 1.8;
+  }
+
+  /* PLAYER */
+  .hero-right {
+    padding-left: 60px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .now-playing-label {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .track-info {
+    margin-bottom: 32px;
+  }
+
+  .track-title {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 28px;
+    line-height: 1.2;
+    margin-bottom: 6px;
+    color: var(--text);
+  }
+
+  .track-artist {
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  /* VISUALIZER */
+  .visualizer {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 48px;
+    margin-bottom: 28px;
+  }
+
+  .bar {
+    width: 4px;
+    background: var(--accent);
+    border-radius: 2px 2px 0 0;
+    transform-origin: bottom;
+    opacity: 0.3;
+    transition: height 0.1s;
+  }
+
+  .bar.active {
+    opacity: 1;
+    animation: viz var(--dur, 0.8s) ease-in-out infinite alternate;
+    animation-delay: var(--delay, 0s);
+  }
+
+  @keyframes viz {
+    from { height: var(--min, 4px); }
+    to   { height: var(--max, 40px); }
+  }
+
+  /* PLAYER CONTROLS */
+  .player-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+
+  .btn-play {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.15s, box-shadow 0.15s;
+    flex-shrink: 0;
+  }
+
+  .btn-play:hover {
+    transform: scale(1.07);
+    box-shadow: 0 0 24px rgba(232,255,71,0.35);
+  }
+
+  .btn-play svg { width: 22px; height: 22px; }
+
+  .volume-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+  }
+
+  .vol-icon { color: var(--muted); }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 2px;
+    background: var(--border);
+    outline: none;
+    border-radius: 2px;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+  }
+
+  .stream-info {
+    margin-top: 20px;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* STREAM URL NOTICE */
+  .stream-notice {
+    margin-top: 10px;
+    padding: 10px 14px;
+    background: rgba(232,255,71,0.06);
+    border: 1px solid rgba(232,255,71,0.15);
+    border-radius: 4px;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+  }
+
+  /* SCHEDULE STRIP */
+  .schedule-strip {
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .schedule-strip::-webkit-scrollbar { display: none; }
+
+  .show-slot {
+    flex-shrink: 0;
+    padding: 20px 28px;
+    border-right: 1px solid var(--border);
+    min-width: 200px;
+    transition: background 0.2s;
+    cursor: default;
+  }
+
+  .show-slot:hover { background: var(--surface); }
+
+  .show-slot.current { background: var(--surface); }
+  .show-slot.current .show-name { color: var(--accent); }
+
+  .show-time {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+  }
+
+  .show-name {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 16px;
+    margin-bottom: 4px;
+  }
+
+  .show-host {
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  /* CONTENT GRID */
+  .content {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .content-col {
+    padding: 40px 32px;
+    border-right: 1px solid var(--border);
+  }
+
+  .content-col:last-child { border-right: none; }
+
+  .col-label {
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .review-card {
+    margin-bottom: 28px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .review-card:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+  .review-genre {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .review-title {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 20px;
+    line-height: 1.2;
+    margin-bottom: 6px;
+  }
+
+  .review-artist {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+  }
+
+  .review-text {
+    font-size: 12px;
+    color: #8a8880;
+    line-height: 1.75;
+  }
+
+  .mix-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .mix-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+  .mix-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    line-height: 1;
+    color: var(--border);
+    flex-shrink: 0;
+    width: 36px;
+  }
+
+  .mix-name {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-size: 17px;
+    margin-bottom: 4px;
+  }
+
+  .mix-meta { font-size: 11px; color: var(--muted); }
+
+  .about-text {
+    font-size: 13px;
+    line-height: 1.85;
+    color: #8a8880;
+    margin-bottom: 20px;
+  }
+
+  .about-text strong { color: var(--text); font-weight: normal; }
+
+  .freq-display {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 72px;
+    line-height: 1;
+    color: var(--accent);
+    letter-spacing: 0.04em;
+    margin: 24px 0 8px;
+  }
+
+  .freq-label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* FOOTER */
+  footer {
+    padding: 24px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid var(--border);
+  }
+
+  .footer-copy {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 24px;
+  }
+
+  .footer-links a {
+    font-size: 11px;
+    color: var(--muted);
+    text-decoration: none;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .footer-links a:hover { color: var(--text); }
+
+  /* TICKER */
+  .ticker {
+    border-bottom: 1px solid var(--border);
+    overflow: hidden;
+    padding: 10px 0;
+    background: var(--surface);
+  }
+
+  .ticker-inner {
+    display: flex;
+    gap: 60px;
+    animation: ticker 30s linear infinite;
+    white-space: nowrap;
+  }
+
+  .ticker-inner:hover { animation-play-state: paused; }
+
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+
+  .ticker-item {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  .ticker-item span { color: var(--accent); margin-right: 8px; }
+
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-left { border-right: none; border-bottom: 1px solid var(--border); padding-right: 0; padding-bottom: 48px; margin-bottom: 48px; }
+    .hero-right { padding-left: 0; }
+    .content { grid-template-columns: 1fr; }
+    .content-col { border-right: none; border-bottom: 1px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <a class="logo" href="#">THISISAWESOMERADIO</a>
+  <div class="header-meta">
+    <div class="live-badge">
+      <div class="live-dot on-air" id="liveDot"></div>
+      <span id="liveText">ON AIR</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#">Programm</a></li>
+      <li><a href="#">Reviews</a></li>
+      <li><a href="#">Mixes</a></li>
+      <li><a href="#">Über uns</a></li>
+    </ul>
+  </div>
+</header>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-inner" id="ticker">
+    <div class="ticker-item"><span>▶</span> NOW PLAYING: THISISAWESOMERADIO – 24/7 INDEPENDENT MUSIC</div>
+    <div class="ticker-item"><span>✦</span> Neue Review: Mk.gee – Two Star & The Dream Police</div>
+    <div class="ticker-item"><span>✦</span> Heute 21:00 – Nightshift mit Clara K.</div>
+    <div class="ticker-item"><span>✦</span> Mix of the Week: Floating Points – Promises</div>
+    <div class="ticker-item"><span>▶</span> NOW PLAYING: THISISAWESOMERADIO – 24/7 INDEPENDENT MUSIC</div>
+    <div class="ticker-item"><span>✦</span> Neue Review: Mk.gee – Two Star & The Dream Police</div>
+    <div class="ticker-item"><span>✦</span> Heute 21:00 – Nightshift mit Clara K.</div>
+    <div class="ticker-item"><span>✦</span> Mix of the Week: Floating Points – Promises</div>
+  </div>
+</div>
+
+<!-- HERO + PLAYER -->
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-tag">Independent Radio · Est. 2024</div>
+    <h1 class="hero-title">THIS<br>IS<br><span>Awesome</span></h1>
+    <p class="hero-sub">Kein Format-Radio. Kein Algorithmus. Nur Musik, die zählt – kurativ, kontextuell, kompromisslos.</p>
+  </div>
+
+  <div class="hero-right">
+    <div class="now-playing-label">On Air</div>
+    <div class="track-info">
+      <div class="track-title" id="trackTitle">Live-Stream</div>
+      <div class="track-artist" id="trackArtist">THISISAWESOMERADIO</div>
+    </div>
+
+    <!-- VISUALIZER -->
+    <div class="visualizer" id="visualizer"></div>
+
+    <!-- laut.fm Embed Player -->
+    <iframe
+      src="https://embed.laut.fm/thisisawesomeradio"
+      width="100%"
+      height="80"
+      frameborder="0"
+      scrolling="no"
+      allow="autoplay"
+      style="border-radius:4px; margin-top:4px;"
+      title="THISISAWESOMERADIO Player"
+    ></iframe>
+  </div>
+</section>
+
+<!-- SCHEDULE -->
+<div class="schedule-strip">
+  <div class="show-slot">
+    <div class="show-time">06:00 – 10:00</div>
+    <div class="show-name">Morning Drift</div>
+    <div class="show-host">mit Jonas W.</div>
+  </div>
+  <div class="show-slot">
+    <div class="show-time">10:00 – 14:00</div>
+    <div class="show-name">Midday Frequencies</div>
+    <div class="show-host">mit Sara L.</div>
+  </div>
+  <div class="show-slot current">
+    <div class="show-time">14:00 – 18:00</div>
+    <div class="show-name">The Afternoon Dig</div>
+    <div class="show-host">mit Patrick H. ← Jetzt</div>
+  </div>
+  <div class="show-slot">
+    <div class="show-time">18:00 – 21:00</div>
+    <div class="show-name">Golden Hour</div>
+    <div class="show-host">mit Mia R.</div>
+  </div>
+  <div class="show-slot">
+    <div class="show-time">21:00 – 00:00</div>
+    <div class="show-name">Nightshift</div>
+    <div class="show-host">mit Clara K.</div>
+  </div>
+  <div class="show-slot">
+    <div class="show-time">00:00 – 06:00</div>
+    <div class="show-name">Late Night Transmission</div>
+    <div class="show-host">Autopilot</div>
+  </div>
+</div>
+
+<!-- CONTENT GRID -->
+<section class="content">
+  <!-- Reviews -->
+  <div class="content-col">
+    <div class="col-label">Aktuelle Reviews</div>
+
+    <div class="review-card">
+      <div class="review-genre">Indie / Art Rock</div>
+      <div class="review-title">Two Star & The Dream Police</div>
+      <div class="review-artist">Mk.gee</div>
+      <p class="review-text">Gitarren, die klingen als würden sie durch Schmelzwasser rauschen. Mk.gee baut auf seinem Debüt eine Traumlogik auf, die zwischen Bedroom-Pop und abgründigem Art-Rock oszilliert – ungreifbar, aber vollkommen präzise.</p>
+    </div>
+
+    <div class="review-card">
+      <div class="review-genre">Electronic / Ambient</div>
+      <div class="review-title">Imaginal Disk</div>
+      <div class="review-artist">Magdalena Bay</div>
+      <p class="review-text">Synthpop mit dem Weltgefühl eines Science-Fiction-Romans aus den Siebzigern. Jeder Track ein Kapitel, jede Überblendung ein Plottwist. Eines der konsequentesten Popalbum dieses Jahres.</p>
+    </div>
+  </div>
+
+  <!-- Mixes -->
+  <div class="content-col">
+    <div class="col-label">Top Mixes</div>
+
+    <div class="mix-item">
+      <div class="mix-num">01</div>
+      <div>
+        <div class="mix-name">Promises</div>
+        <div class="mix-meta">Floating Points × Pharoah Sanders × LSO — 46 min</div>
+      </div>
+    </div>
+    <div class="mix-item">
+      <div class="mix-num">02</div>
+      <div>
+        <div class="mix-name">DJ-Kicks: Actress</div>
+        <div class="mix-meta">!K7 Records — 75 min</div>
+      </div>
+    </div>
+    <div class="mix-item">
+      <div class="mix-num">03</div>
+      <div>
+        <div class="mix-name">Fabriclive 100</div>
+        <div class="mix-meta">Kode9 — 68 min</div>
+      </div>
+    </div>
+    <div class="mix-item">
+      <div class="mix-num">04</div>
+      <div>
+        <div class="mix-name">Late Night Tales: Bonobo</div>
+        <div class="mix-meta">ALNL — 80 min</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- About -->
+  <div class="content-col">
+    <div class="col-label">Über THISISAWESOMERADIO</div>
+    <p class="about-text">
+      Wir sind ein unabhängiges Webradio mit einem einfachen Anspruch: <strong>Musik, die es verdient, gehört zu werden.</strong> Kein Format-Zwang, keine Playlist-Optimierung für Algorithmen, keine Werbepausen.
+    </p>
+    <p class="about-text">
+      Unsere Redaktion schreibt Reviews, stellt Kontexte her und sendet sieben Tage die Woche – von Jazz bis Footwork, von Singer-Songwriter bis Industrial. Weil gute Musik keine Schubladen braucht.
+    </p>
+    <div class="freq-display">24/7</div>
+    <div class="freq-label">Online · Unabhängig · Kostenlos</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-copy">© 2025 THISISAWESOMERADIO. Alle Rechte vorbehalten.</div>
+  <div class="footer-links">
+    <a href="#">Instagram</a>
+    <a href="#">Spotify</a>
+    <a href="#">Kontakt</a>
+    <a href="#">Impressum</a>
+  </div>
+</footer>
+
+<script>
+  // ─── VISUALIZER SETUP ─────────────────────────────────────────────────────
+  const vizEl = document.getElementById('visualizer');
+  const BAR_COUNT = 28;
+  for (let i = 0; i < BAR_COUNT; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'bar active';
+    const minH = Math.floor(Math.random() * 6 + 3);
+    const maxH = Math.floor(Math.random() * 34 + 12);
+    const dur = (Math.random() * 0.6 + 0.4).toFixed(2);
+    const delay = (Math.random() * 0.5).toFixed(2);
+    bar.style.setProperty('--min', minH + 'px');
+    bar.style.setProperty('--max', maxH + 'px');
+    bar.style.setProperty('--dur', dur + 's');
+    bar.style.setProperty('--delay', delay + 's');
+    bar.style.height = minH + 'px';
+    vizEl.appendChild(bar);
+  }
+</script>
+</body>
+</html>
