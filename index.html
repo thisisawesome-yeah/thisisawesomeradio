@@ -605,7 +605,7 @@
     letter-spacing: 0.1em;
   }
 
-  
+  @media (max-width: 900px) {
     .hero { grid-template-columns: 1fr; }
     .hero-left { border-right: none; border-bottom: 1px solid var(--border); padding-right: 0; padding-bottom: 48px; margin-bottom: 48px; }
     .hero-right { padding-left: 0; }
@@ -879,6 +879,6 @@
   audio.addEventListener('error', () => tryPlay(streamIndex + 1));
   audio.addEventListener('waiting', () => { streamInfo.textContent = 'Buffering…'; });
   audio.addEventListener('playing', () => { streamInfo.textContent = 'Live ✓'; });
-</script></script>
+</script>
 </body>
 </html>
