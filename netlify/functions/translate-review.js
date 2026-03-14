@@ -13,7 +13,8 @@
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 const MODEL             = 'claude-sonnet-4-20250514';
 const MAX_TOKENS        = 1000;
-const MAX_INPUT_LENGTH  = 2000; // Guard against oversized inputs
+const MAX_INPUT_LENGTH  = 5000; // Accept longer texts
+const MAX_TEXT_FOR_AI   = 1200; // Truncate to keep Claude response fast
 
 exports.handler = async (event) => {
   // Handle CORS preflight
@@ -41,13 +42,18 @@ exports.handler = async (event) => {
 
   const { text, artist, title } = body;
 
-  if (!text || typeof text !== 'string') {
-    return corsResponse(400, JSON.stringify({ error: 'Fehlender Parameter: text' }));
+  if (!text && !title) {
+    return corsResponse(400, JSON.stringify({ error: 'Fehlender Parameter: text oder title' }));
   }
 
-  if (text.length > MAX_INPUT_LENGTH) {
+  if ((text || '').length > MAX_INPUT_LENGTH) {
     return corsResponse(400, JSON.stringify({ error: 'Text zu lang' }));
   }
+
+  // Truncate for Claude to stay within timeout
+  const textForAI = (text || '').length > MAX_TEXT_FOR_AI
+    ? text.slice(0, MAX_TEXT_FOR_AI) + '…'
+    : (text || '');
 
   // Build prompt
   const prompt = `Du bist Musikredakteur bei THISISAWESOMERADIO, einem unabhängigen Webradio aus Bremen.
@@ -67,9 +73,7 @@ ${title || ''}
 Artist: ${artist || ''}
 
 Review-Text:
-${text || ''}`;
-
-  // Call Claude API
+${textForAI}`;
   try {
     const response = await fetch(ANTHROPIC_API_URL, {
       method: 'POST',
