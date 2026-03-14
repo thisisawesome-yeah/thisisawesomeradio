@@ -99,18 +99,25 @@ ${text || ''}`;
       return corsResponse(502, JSON.stringify({ error: 'Leere Antwort' }));
     }
 
+    // Strip markdown code fences Claude sometimes wraps around JSON
+    const cleaned = raw
+      .replace(/^```(?:json)?\s*/i, '')
+      .replace(/\s*```$/, '')
+      .trim();
+
     // Parse JSON response from Claude
     let parsed;
     try {
-      parsed = JSON.parse(raw);
-    } catch {
-      // Fallback: treat entire response as translatedText
-      parsed = { translatedTitle: title, translatedText: raw };
+      parsed = JSON.parse(cleaned);
+    } catch (e) {
+      console.error('[translate-review] JSON parse fehlgeschlagen, raw:', cleaned);
+      // Fallback: return original values
+      parsed = { translatedTitle: title, translatedText: text };
     }
 
     return corsResponse(200, JSON.stringify({
       translatedTitle: parsed.translatedTitle || title,
-      translatedText:  parsed.translatedText  || raw,
+      translatedText:  parsed.translatedText  || text,
     }));
 
   } catch (err) {
