@@ -1259,6 +1259,18 @@
     return { title: lines[0], artist: lines[1], text: textLines || '' };
   }
 
+  function renderReviews(reviews) {
+    reviewCards.innerHTML = reviews.map(r => `
+      <div class="review-card">
+        <div class="review-genre">${sanitize(formatDate(r.date))}</div>
+        <div class="review-title">${sanitize(r.title)}</div>
+        <div class="review-artist">${sanitize(r.artist)}</div>
+        ${r.text ? `<p class="review-text">${sanitize(r.text)}</p>` : ''}
+        ${r.permalink ? `<a class="review-link" href="${sanitize(r.permalink)}" target="_blank" rel="noopener">Auf Instagram →</a>` : ''}
+      </div>
+    `).join('');
+  }
+
   async function loadReviews() {
     try {
       const data = await fetchJSON(`https://feeds.behold.so/${CONFIG.BEHOLD_ID}`);
@@ -1278,18 +1290,17 @@
         return;
       }
 
-      // Translate & polish all reviews in parallel via Claude API
-      const translated = await Promise.all(reviews.map(r => translateReview(r)));
+      // Zeige Reviews sofort an (Originaltext)
+      renderReviews(reviews);
 
-      reviewCards.innerHTML = translated.map(r => `
-        <div class="review-card">
-          <div class="review-genre">${sanitize(formatDate(r.date))}</div>
-          <div class="review-title">${sanitize(r.title)}</div>
-          <div class="review-artist">${sanitize(r.artist)}</div>
-          ${r.text ? `<p class="review-text">${sanitize(r.text)}</p>` : ''}
-          ${r.permalink ? `<a class="review-link" href="${sanitize(r.permalink)}" target="_blank" rel="noopener">Auf Instagram →</a>` : ''}
-        </div>
-      `).join('');
+      // Übersetze nacheinander und aktualisiere jede Karte einzeln
+      for (let i = 0; i < reviews.length; i++) {
+        const translated = await translateReview(reviews[i]);
+        if (translated.text !== reviews[i].text) {
+          reviews[i] = translated;
+          renderReviews(reviews);
+        }
+      }
 
     } catch (err) {
       console.error('[Reviews] Fehler beim Laden:', err);
