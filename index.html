@@ -1271,20 +1271,27 @@
   }
 
   async function translateOne(review) {
+    console.log('[translateOne] Starte Übersetzung für:', review.title);
     try {
       const res = await fetch('/.netlify/functions/translate-review', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: review.text, title: review.title, artist: review.artist }),
       });
-      if (!res.ok) return review;
+      console.log('[translateOne] Response status:', res.status);
+      if (!res.ok) {
+        console.error('[translateOne] HTTP Fehler:', res.status);
+        return review;
+      }
       const json = await res.json();
+      console.log('[translateOne] Antwort:', json);
       return {
         ...review,
         title: json.translatedTitle || review.title,
         text:  json.translatedText  || review.text,
       };
-    } catch {
+    } catch (err) {
+      console.error('[translateOne] Fehler:', err);
       return review;
     }
   }
