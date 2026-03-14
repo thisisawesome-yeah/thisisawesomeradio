@@ -52,17 +52,22 @@ exports.handler = async (event) => {
   // Build prompt
   const prompt = `Du bist Musikredakteur bei THISISAWESOMERADIO, einem unabhängigen Webradio aus Bremen.
 
-Aufgabe: Übersetze und überarbeite den folgenden Review-Text ins Deutsche.
-- Wenn der Text bereits auf Deutsch ist, überarbeite ihn redaktionell.
+Übersetze und überarbeite die folgenden Felder eines Musik-Reviews ins Deutsche.
+Regeln:
+- Übersetze NUR wenn der Text auf Englisch ist; ist er bereits Deutsch, überarbeite ihn redaktionell.
 - Korrigiere Grammatik, Rechtschreibung und Stil.
-- Bewahre die inhaltliche Aussage und den Ton.
-- Halte den Text prägnant (maximal 3–4 Sätze).
-- Gib NUR den fertigen deutschen Text zurück – keine Anführungszeichen, keine Erklärungen.
+- Bewahre inhaltliche Aussage und Ton.
+- Review-Text: maximal 3–4 Sätze.
+- Künstlername und Songtitel NIEMALS übersetzen.
+- Antworte ausschließlich als JSON ohne Markdown-Backticks: {"translatedTitle": "...", "translatedText": "..."}
+
+Titel (kann ein Songtitel, ein Albumtitel oder ein einleitender Satz sein):
+${title || ''}
 
 Artist: ${artist || ''}
-Titel: ${title || ''}
+
 Review-Text:
-${text}`;
+${text || ''}`;
 
   // Call Claude API
   try {
@@ -87,14 +92,26 @@ ${text}`;
     }
 
     const data = await response.json();
-    const translatedText = data.content?.[0]?.text?.trim();
+    const raw = data.content?.[0]?.text?.trim();
 
-    if (!translatedText) {
+    if (!raw) {
       console.error('[translate-review] Leere Antwort von Claude:', data);
       return corsResponse(502, JSON.stringify({ error: 'Leere Antwort' }));
     }
 
-    return corsResponse(200, JSON.stringify({ translatedText }));
+    // Parse JSON response from Claude
+    let parsed;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      // Fallback: treat entire response as translatedText
+      parsed = { translatedTitle: title, translatedText: raw };
+    }
+
+    return corsResponse(200, JSON.stringify({
+      translatedTitle: parsed.translatedTitle || title,
+      translatedText:  parsed.translatedText  || raw,
+    }));
 
   } catch (err) {
     console.error('[translate-review] Netzwerkfehler:', err);
