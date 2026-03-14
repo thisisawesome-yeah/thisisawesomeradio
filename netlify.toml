@@ -2,7 +2,7 @@
   functions = "netlify/functions"
   publish   = "."
 
-[functions]
+[functions."translate-review"]
   timeout = 26
 
 [[headers]]
