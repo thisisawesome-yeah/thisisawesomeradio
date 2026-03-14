@@ -1298,8 +1298,18 @@
 
   async function loadReviews() {
     try {
-      const data = await fetchJSON(`https://feeds.behold.so/${CONFIG.BEHOLD_ID}`);
+      // Behold kann CORS-Issues haben – toleranter Fetch ohne Exception bei non-2xx
+      const res = await fetch(`https://feeds.behold.so/${CONFIG.BEHOLD_ID}`);
+      console.log('[Reviews] Behold status:', res.status);
+      if (!res.ok) {
+        console.error('[Reviews] Behold Fehler:', res.status);
+        reviewCards.innerHTML = '<div class="review-card"><div class="review-genre">Reviews werden geladen…</div></div>';
+        return;
+      }
+      const data = await res.json();
+      console.log('[Reviews] Behold data type:', Array.isArray(data) ? 'array' : typeof data, Object.keys(data || {}));
       const rawPosts = Array.isArray(data) ? data : (data.posts || []);
+      console.log('[Reviews] Posts gefunden:', rawPosts.length);
 
       const reviews = rawPosts
         .map(post => {
