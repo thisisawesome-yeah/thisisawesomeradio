@@ -1296,10 +1296,8 @@
       // Übersetze nacheinander und aktualisiere jede Karte einzeln
       for (let i = 0; i < reviews.length; i++) {
         const translated = await translateReview(reviews[i]);
-        if (translated.text !== reviews[i].text) {
-          reviews[i] = translated;
-          renderReviews(reviews);
-        }
+        reviews[i] = translated; // Immer updaten, auch wenn gleich
+        renderReviews(reviews);
       }
 
     } catch (err) {
@@ -1308,12 +1306,6 @@
     }
   }
 
-  /**
-   * Translates and editorially polishes a review text using Claude.
-   * Translates and editorially polishes a review text via the
-   * server-side Netlify Function proxy (keeps API key out of the browser).
-   * Falls back to original text if the call fails.
-   */
   async function translateReview(review) {
     if (!review.text && !review.title) return review;
     try {
@@ -1329,7 +1321,6 @@
 
       if (!response.ok) throw new Error(`Proxy ${response.status}`);
       const data = await response.json();
-      if (!data.translatedText) throw new Error('Leere Antwort vom Proxy');
 
       return {
         ...review,
