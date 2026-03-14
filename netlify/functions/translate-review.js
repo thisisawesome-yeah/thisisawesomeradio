@@ -11,7 +11,7 @@
  */
 
 const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
-const MODEL             = 'claude-sonnet-4-20250514';
+const MODEL             = 'claude-sonnet-4-6';
 const MAX_TOKENS        = 1000;
 const MAX_INPUT_LENGTH  = 5000; // Accept longer texts
 const MAX_TEXT_FOR_AI   = 1200; // Truncate to keep Claude response fast
@@ -58,21 +58,21 @@ exports.handler = async (event) => {
   // Build prompt
   const prompt = `Du bist Musikredakteur bei THISISAWESOMERADIO, einem unabhängigen Webradio aus Bremen.
 
-Übersetze und überarbeite die folgenden Felder eines Musik-Reviews ins Deutsche.
+Übersetze und überarbeite die folgenden Felder eines Musik-Reviews auf Deutsch.
 Regeln:
-- Übersetze NUR wenn der Text auf Englisch ist; ist er bereits Deutsch, überarbeite ihn redaktionell.
+- Übersetze IMMER ins Deutsche – auch wenn der Text schon teilweise Deutsch ist.
 - Korrigiere Grammatik, Rechtschreibung und Stil.
 - Bewahre inhaltliche Aussage und Ton.
-- Review-Text: maximal 3–4 Sätze.
-- Künstlername und Songtitel NIEMALS übersetzen.
+- Review-Text: fasse auf maximal 3–4 prägnante Sätze zusammen.
+- Künstlername, Bandname und Songtitel NIEMALS übersetzen – original lassen.
 - Antworte ausschließlich als JSON ohne Markdown-Backticks: {"translatedTitle": "...", "translatedText": "..."}
 
-Titel (kann ein Songtitel, ein Albumtitel oder ein einleitender Satz sein):
+Titel:
 ${title || ''}
 
 Artist: ${artist || ''}
 
-Review-Text:
+Review-Text (übersetze und kürze auf 3–4 Sätze):
 ${textForAI}`;
   try {
     const response = await fetch(ANTHROPIC_API_URL, {
