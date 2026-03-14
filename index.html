@@ -1315,15 +1315,15 @@
    * Falls back to original text if the call fails.
    */
   async function translateReview(review) {
-    if (!review.text) return review;
+    if (!review.text && !review.title) return review;
     try {
       const response = await fetch('/.netlify/functions/translate-review', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           text:   review.text,
-          artist: review.artist,
           title:  review.title,
+          artist: review.artist,
         }),
       });
 
@@ -1331,7 +1331,11 @@
       const data = await response.json();
       if (!data.translatedText) throw new Error('Leere Antwort vom Proxy');
 
-      return { ...review, text: data.translatedText };
+      return {
+        ...review,
+        title: data.translatedTitle || review.title,
+        text:  data.translatedText  || review.text,
+      };
     } catch (err) {
       console.error('[translateReview] Fallback auf Originaltext:', err);
       return review;
