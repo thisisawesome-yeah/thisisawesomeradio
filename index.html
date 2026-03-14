@@ -1252,7 +1252,6 @@
   }
 
   function parseCaption(caption) {
-    // Expected format: line1 = Titel, line2 = Künstler, rest = Reviewtext
     const lines = caption.trim().split('\n').map(l => l.trim()).filter(Boolean);
     if (lines.length < 2) return null;
     const textLines = lines.slice(2).filter(l => !l.startsWith('#')).join(' ');
@@ -1262,13 +1261,32 @@
   function renderReviews(reviews) {
     reviewCards.innerHTML = reviews.map(r => `
       <div class="review-card">
-        <div class="review-genre">${sanitize(formatDate(r.date))}</div>
+        <div class="review-genre">${sanitize(r.dateStr || '')}</div>
         <div class="review-title">${sanitize(r.title)}</div>
         <div class="review-artist">${sanitize(r.artist)}</div>
         ${r.text ? `<p class="review-text">${sanitize(r.text)}</p>` : ''}
         ${r.permalink ? `<a class="review-link" href="${sanitize(r.permalink)}" target="_blank" rel="noopener">Auf Instagram →</a>` : ''}
       </div>
     `).join('');
+  }
+
+  async function translateOne(review) {
+    try {
+      const res = await fetch('/.netlify/functions/translate-review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: review.text, title: review.title, artist: review.artist }),
+      });
+      if (!res.ok) return review;
+      const json = await res.json();
+      return {
+        ...review,
+        title: json.translatedTitle || review.title,
+        text:  json.translatedText  || review.text,
+      };
+    } catch {
+      return review;
+    }
   }
 
   async function loadReviews() {
@@ -1280,7 +1298,11 @@
         .map(post => {
           const parsed = parseCaption(post.caption || '');
           if (!parsed) return null;
-          return { ...parsed, date: post.timestamp, permalink: post.permalink };
+          return {
+            ...parsed,
+            dateStr:   new Date(post.timestamp).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+            permalink: post.permalink,
+          };
         })
         .filter(Boolean)
         .slice(0, CONFIG.REVIEW_COUNT);
@@ -1290,46 +1312,18 @@
         return;
       }
 
-      // Zeige Reviews sofort an (Originaltext)
+      // 1. Sofort anzeigen (Originaltext)
       renderReviews(reviews);
 
-      // Übersetze nacheinander und aktualisiere jede Karte einzeln
+      // 2. Nacheinander übersetzen und DOM live updaten
       for (let i = 0; i < reviews.length; i++) {
-        const translated = await translateReview(reviews[i]);
-        reviews[i] = translated; // Immer updaten, auch wenn gleich
+        reviews[i] = await translateOne(reviews[i]);
         renderReviews(reviews);
       }
 
     } catch (err) {
-      console.error('[Reviews] Fehler beim Laden:', err);
+      console.error('[Reviews] Fehler:', err);
       reviewCards.innerHTML = '<div class="review-card"><div class="review-genre">Reviews nicht verfügbar</div></div>';
-    }
-  }
-
-  async function translateReview(review) {
-    if (!review.text && !review.title) return review;
-    try {
-      const response = await fetch('/.netlify/functions/translate-review', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          text:   review.text,
-          title:  review.title,
-          artist: review.artist,
-        }),
-      });
-
-      if (!response.ok) throw new Error(`Proxy ${response.status}`);
-      const data = await response.json();
-
-      return {
-        ...review,
-        title: data.translatedTitle || review.title,
-        text:  data.translatedText  || review.text,
-      };
-    } catch (err) {
-      console.error('[translateReview] Fallback auf Originaltext:', err);
-      return review;
     }
   }
 
