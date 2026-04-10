@@ -1348,7 +1348,7 @@
 
       // Separate Album of the Month from regular reviews
       const aotmIndex = reviews.findIndex(r =>
-        /awesome\s*music/i.test(r.title) || /album\s*of\s*the\s*month/i.test(r.title)
+        /music\s*of\s*the\s*month/i.test(r.title) || /album\s*of\s*the\s*month/i.test(r.title)
       );
       let aotm = null;
       const regularReviews = [...reviews];
@@ -1363,11 +1363,15 @@
 
       // Render Album of the Month
       if (translatedAotm) {
+        // artist field contains "Artist - Album" for AOTM posts
+        const parts = translatedAotm.artist.split(/\s*[-–]\s*/);
+        const aotmArtist = parts[0] || '';
+        const aotmAlbum = parts.slice(1).join(' – ') || '';
         aotmCard.innerHTML = `
           <div class="aotm">
             <div class="aotm-badge">Album<br>of the<br>Month</div>
-            <div class="aotm-title">${sanitize(translatedAotm.title)}</div>
-            <div class="aotm-artist">${sanitize(translatedAotm.artist)}</div>
+            <div class="aotm-title">${sanitize(aotmAlbum || translatedAotm.artist)}</div>
+            <div class="aotm-artist">${sanitize(aotmArtist)}</div>
             <div>
               ${translatedAotm.text ? `<p class="aotm-text">${sanitize(translatedAotm.text)}</p>` : ''}
               ${translatedAotm.permalink ? `<a class="aotm-link" href="${sanitize(translatedAotm.permalink)}" target="_blank" rel="noopener">View on Instagram →</a>` : ''}
