@@ -1332,29 +1332,29 @@
       const data = await fetchJSON(`https://feeds.behold.so/${CONFIG.BEHOLD_ID}`);
       const rawPosts = Array.isArray(data) ? data : (data.posts || []);
 
-      const reviews = rawPosts
+      const allParsed = rawPosts
         .map(post => {
           const parsed = parseCaption(post.caption || '');
           if (!parsed) return null;
           return { ...parsed, date: post.timestamp, permalink: post.permalink };
         })
-        .filter(Boolean)
-        .slice(0, CONFIG.REVIEW_COUNT);
+        .filter(Boolean);
 
-      if (!reviews.length) {
+      if (!allParsed.length) {
         reviewCards.innerHTML = '<div class="review-card"><div class="review-genre">No reviews yet</div></div>';
         return;
       }
 
-      // Separate Album of the Month from regular reviews
-      const aotmIndex = reviews.findIndex(r =>
+      // Find the most recent Album of the Month across ALL posts
+      const aotmIndex = allParsed.findIndex(r =>
         /music\s*of\s*the\s*month/i.test(r.title) || /album\s*of\s*the\s*month/i.test(r.title)
       );
       let aotm = null;
-      const regularReviews = [...reviews];
+      const withoutAotm = [...allParsed];
       if (aotmIndex !== -1) {
-        aotm = regularReviews.splice(aotmIndex, 1)[0];
+        aotm = withoutAotm.splice(aotmIndex, 1)[0];
       }
+      const regularReviews = withoutAotm.slice(0, CONFIG.REVIEW_COUNT);
 
       // Translate & polish all reviews in parallel via Claude API
       const allToTranslate = aotm ? [aotm, ...regularReviews] : regularReviews;
