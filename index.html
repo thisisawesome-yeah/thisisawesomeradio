@@ -381,6 +381,69 @@
   .reviews-grid .review-card:hover { background: var(--surface); }
   .reviews-grid .review-card:last-child { border: none; }
 
+  /* ALBUM OF THE MONTH – FEATURED CARD */
+  .aotm {
+    border: 1px solid var(--border);
+    padding: clamp(24px, 4vw, 40px);
+    margin-bottom: 28px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0 clamp(24px, 4vw, 48px);
+    align-items: start;
+    transition: background 0.2s;
+  }
+
+  .aotm:hover { background: var(--surface); }
+
+  .aotm-badge {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 8vw, 80px);
+    line-height: 0.85;
+    color: #E8FD48;
+    letter-spacing: 0.02em;
+    grid-row: 1 / 4;
+    align-self: center;
+    white-space: nowrap;
+  }
+
+  .aotm-title {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-style: italic;
+    font-size: clamp(22px, 3vw, 32px);
+    line-height: 1.2;
+    color: #E8FD48;
+    margin-bottom: 4px;
+  }
+
+  .aotm-artist {
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .aotm-text {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.8;
+    max-width: 540px;
+  }
+
+  .aotm-link {
+    display: inline-block;
+    margin-top: 12px;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #E8FD48;
+    text-decoration: none;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+  }
+
+  .aotm-link:hover { opacity: 1; }
+
   /* ABOUT */
   .content {
     display: grid;
@@ -819,6 +882,8 @@
     .show-name { font-size: 15px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .show-host { max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+    .aotm { grid-template-columns: 1fr; }
+    .aotm-badge { font-size: 36px; grid-row: auto; margin-bottom: 12px; }
     .reviews-grid { grid-template-columns: repeat(2, 1fr); }
     .content { grid-template-columns: 1fr; }
     .content-col { border-right: none; border-bottom: 1px solid var(--border); }
@@ -912,6 +977,7 @@
   <div class="reviews-header">
     <div class="col-label">Latest Reviews</div>
   </div>
+  <div id="aotmCard"></div>
   <div class="reviews-grid" id="reviewCards">
     <div class="review-card review-loading">
       <div class="review-genre">Loading…</div>
@@ -1051,7 +1117,7 @@
     STATION:        'thisisawesomeradio',
     BEHOLD_ID:      'JuATRBaeMpZOYE2V0J4R',
     CONTACT:        'andre.conin@gmail.com',
-    REVIEW_COUNT:   5,
+    REVIEW_COUNT:   6,
     POLL_INTERVAL:  30_000,
     STREAMS: [
       'https://stream.laut.fm/thisisawesomeradio',
@@ -1244,6 +1310,7 @@
   });
 
   // ─── REVIEWS (Behold.so / Instagram) ─────────────────────────────────────
+  const aotmCard    = document.getElementById('aotmCard');
   const reviewCards = document.getElementById('reviewCards');
 
   function formatDate(iso) {
@@ -1279,10 +1346,37 @@
         return;
       }
 
-      // Translate & polish all reviews in parallel via Claude API
-      const translated = await Promise.all(reviews.map(r => translateReview(r)));
+      // Separate Album of the Month from regular reviews
+      const aotmIndex = reviews.findIndex(r =>
+        /awesome\s*music/i.test(r.title) || /album\s*of\s*the\s*month/i.test(r.title)
+      );
+      let aotm = null;
+      const regularReviews = [...reviews];
+      if (aotmIndex !== -1) {
+        aotm = regularReviews.splice(aotmIndex, 1)[0];
+      }
 
-      reviewCards.innerHTML = translated.map(r => `
+      // Translate & polish all reviews in parallel via Claude API
+      const allToTranslate = aotm ? [aotm, ...regularReviews] : regularReviews;
+      const translated = await Promise.all(allToTranslate.map(r => translateReview(r)));
+      const [translatedAotm, ...translatedRegular] = aotm ? translated : [null, ...translated];
+
+      // Render Album of the Month
+      if (translatedAotm) {
+        aotmCard.innerHTML = `
+          <div class="aotm">
+            <div class="aotm-badge">Album<br>of the<br>Month</div>
+            <div class="aotm-title">${sanitize(translatedAotm.title)}</div>
+            <div class="aotm-artist">${sanitize(translatedAotm.artist)}</div>
+            <div>
+              ${translatedAotm.text ? `<p class="aotm-text">${sanitize(translatedAotm.text)}</p>` : ''}
+              ${translatedAotm.permalink ? `<a class="aotm-link" href="${sanitize(translatedAotm.permalink)}" target="_blank" rel="noopener">View on Instagram →</a>` : ''}
+            </div>
+          </div>`;
+      }
+
+      // Render regular reviews
+      reviewCards.innerHTML = translatedRegular.map(r => `
         <div class="review-card">
           <div class="review-genre">${sanitize(formatDate(r.date))}</div>
           <div class="review-title">${sanitize(r.title)}</div>
