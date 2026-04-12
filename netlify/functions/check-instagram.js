@@ -1,46 +1,78 @@
 /**
  * Netlify Scheduled Function: check-instagram
  *
- * Runs every 2 hours. Fetches the behold.so Instagram feed and compares
- * the latest post against the previously stored one (Netlify Blobs).
- * When a new post is detected it logs the event and optionally sends
- * a webhook notification (set NEW_POST_WEBHOOK_URL env var).
+ * Runs every 2 hours. Fetches the latest Instagram post via the Graph API,
+ * compares it against the previously stored one (Netlify Blobs), and
+ * optionally sends a webhook notification (set NEW_POST_WEBHOOK_URL env var).
+ *
+ * Also refreshes the long-lived Instagram access token automatically
+ * so it never expires (valid 60 days, refreshed every 2 hours).
  */
 
 const { schedule } = require('@netlify/functions');
 const { getStore }  = require('@netlify/blobs');
 
-const BEHOLD_FEED_URL = 'https://feeds.behold.so/JuATRBaeMpZOYE2V0J4R';
-const STORE_NAME      = 'instagram-check';
-const LAST_POST_KEY   = 'last-post-permalink';
+const INSTAGRAM_API = 'https://graph.instagram.com';
+const FIELDS        = 'id,caption,timestamp,permalink';
+const STORE_NAME    = 'instagram';
+const LAST_POST_KEY = 'last-post-permalink';
 
 exports.handler = schedule('0 */2 * * *', async () => {
   console.log('[check-instagram] Prüfe auf neue Posts …');
 
   try {
-    // ── Aktuellen Feed laden ──────────────────────────────────────────────
-    const res = await fetch(BEHOLD_FEED_URL);
+    const store = getStore(STORE_NAME);
+
+    // ── Token laden (erneuert > env var) ──────────────────────────────────
+    let token = (await store.get('access-token')) || process.env.INSTAGRAM_ACCESS_TOKEN;
+
+    if (!token) {
+      console.error('[check-instagram] Kein Instagram Access Token verfügbar');
+      return { statusCode: 500 };
+    }
+
+    // ── Token automatisch erneuern ────────────────────────────────────────
+    try {
+      const refreshRes = await fetch(
+        `${INSTAGRAM_API}/refresh_access_token?grant_type=ig_refresh_token&access_token=${token}`
+      );
+      if (refreshRes.ok) {
+        const refreshData = await refreshRes.json();
+        if (refreshData.access_token) {
+          token = refreshData.access_token;
+          await store.set('access-token', token);
+          console.log('[check-instagram] Token erfolgreich erneuert');
+        }
+      } else {
+        console.warn('[check-instagram] Token-Erneuerung fehlgeschlagen:', refreshRes.status);
+      }
+    } catch (refreshErr) {
+      console.warn('[check-instagram] Token-Erneuerung Fehler:', refreshErr.message);
+    }
+
+    // ── Neuesten Post laden ───────────────────────────────────────────────
+    const url = `${INSTAGRAM_API}/me/media?fields=${FIELDS}&limit=1&access_token=${token}`;
+    const res = await fetch(url);
+
     if (!res.ok) {
-      console.error(`[check-instagram] Feed-Abruf fehlgeschlagen: ${res.status}`);
+      console.error(`[check-instagram] Instagram API Fehler: ${res.status}`);
       return { statusCode: 502 };
     }
 
     const data  = await res.json();
-    const posts = Array.isArray(data) ? data : (data.posts || []);
+    const posts = data.data || [];
 
     if (!posts.length) {
-      console.log('[check-instagram] Keine Posts im Feed');
+      console.log('[check-instagram] Keine Posts gefunden');
       return { statusCode: 200 };
     }
 
     const latest          = posts[0];
-    const latestPermalink = latest.permalink || latest.id;
+    const latestPermalink = latest.permalink;
 
-    // ── Letzten bekannten Post aus dem Store laden ─────────────────────────
-    const store    = getStore(STORE_NAME);
+    // ── Letzten bekannten Post prüfen ─────────────────────────────────────
     const storedId = await store.get(LAST_POST_KEY);
 
-    // Erster Durchlauf – Post merken, keine Benachrichtigung
     if (!storedId) {
       console.log('[check-instagram] Erster Lauf – speichere aktuellen Post');
       await store.set(LAST_POST_KEY, latestPermalink);
