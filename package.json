@@ -1,0 +1,8 @@
+{
+  "name": "thisisawesomeradio",
+  "private": true,
+  "dependencies": {
+    "@netlify/blobs": "^8.1.0",
+    "@netlify/functions": "^3.0.0"
+  }
+}

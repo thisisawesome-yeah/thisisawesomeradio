@@ -3,3 +3,5 @@ mnt/
 thisisawesomeradio.zip
 thisisawesomeradio.html
 vercel.json
+node_modules/
+.netlify/
