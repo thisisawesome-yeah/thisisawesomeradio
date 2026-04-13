@@ -1115,6 +1115,7 @@
   // ─── CONFIG ───────────────────────────────────────────────────────────────
   const CONFIG = {
     STATION:        'thisisawesomeradio',
+    BEHOLD_ID:      'JuATRBaeMpZOYE2V0J4R',
     CONTACT:        'andre.conin@gmail.com',
     REVIEW_COUNT:   6,
     POLL_INTERVAL:  30_000,
@@ -1328,7 +1329,8 @@
 
   async function loadReviews() {
     try {
-      const rawPosts = await fetchJSON('/netlify/functions/instagram-feed');
+      const data = await fetchJSON(`https://feeds.behold.so/${CONFIG.BEHOLD_ID}`);
+      const rawPosts = Array.isArray(data) ? data : (data.posts || []);
 
       const allParsed = rawPosts
         .map(post => {
